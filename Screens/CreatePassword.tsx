@@ -1,5 +1,3 @@
-/* eslint-disable prettier/prettier */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import {Button, StyleSheet, Text, TextInput, View} from 'react-native';
 import React from 'react';
 import {Formik} from 'formik';

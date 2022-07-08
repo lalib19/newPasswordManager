@@ -1,5 +1,3 @@
-/* eslint-disable prettier/prettier */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Button,
   Modal,
@@ -44,7 +42,7 @@ const ModalComponent: React.FC<EditFormProps> = ({itemValues}) => {
     type: string(),
   });
 
-  const onSubmit = (values: FormValues, item: {id: string}) => {
+  const onSubmit = (values: FormValues) => {
     firestore()
       .collection('Users')
       .doc(itemValues.currentUserId)
@@ -85,7 +83,7 @@ const ModalComponent: React.FC<EditFormProps> = ({itemValues}) => {
               type: '',
             }}
             validationSchema={loginValidationSchema}
-            onSubmit={onSubmit}>
+            onSubmit={(values)=>onSubmit(values)}>
             {({
               handleChange,
               handleBlur,
@@ -210,8 +208,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'lightblue',
     borderRadius: 5,
-    padding: 20,
+    padding: 30,
     elevation: 10,
+    borderWidth: 1,
+    borderColor: "dodgerblue"
   },
   combo: {
     flex: 1,

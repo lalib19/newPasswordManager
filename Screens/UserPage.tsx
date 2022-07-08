@@ -1,15 +1,12 @@
-/* eslint-disable prettier/prettier */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   ActivityIndicator,
-  Button,
   FlatList,
-  Modal,
   StyleSheet,
   Text,
   TouchableOpacity,
-  TouchableOpacityBase,
   View,
+  ToastAndroid,
+  Button,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import auth, {firebase} from '@react-native-firebase/auth';
@@ -19,15 +16,20 @@ import {RouteParams} from '../App';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import ModalComponent from '../Components/ModalComponent';
+import Header from '../Components/Header';
+import Clipboard from '@react-native-clipboard/clipboard';
 // import Ionicons from 'react-native-ionicons';
 
-
+type PasswordArray = {
+  data: any;
+  id: string;
+};
 const UserPage = ({}) => {
-  const [userPasswords, setUserPasswords] = useState([]);
+  const [userPasswords, setUserPasswords] = useState<PasswordArray[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  
+
   const navigation = useNavigation<NativeStackNavigationProp<RouteParams>>();
-  const currentUserId: string | undefined = firebase.auth().currentUser?.uid
+  const currentUserId: string | undefined = firebase.auth().currentUser?.uid;
 
   const deletePassword = (item: {id: string | undefined}) => {
     firestore()
@@ -41,27 +43,31 @@ const UserPage = ({}) => {
       });
   };
 
+  const copyToClip = (item: any) => {
+    Clipboard.setString(item.data.password);
+    ToastAndroid.show('Password copied to clipboard !', ToastAndroid.SHORT);
+  };
+
   useEffect(() => {
     const subscriber = firestore()
       .collection('Users')
       .doc(currentUserId)
       .collection('passwords')
       .onSnapshot(documentSnapshot => {
-        let allPasswords: any[] = [];
+        let allPasswords: PasswordArray[] = [];
         documentSnapshot.forEach(el => {
           allPasswords.push({
             data: el.data(),
             id: el.id,
             // path: el._ref._documentPath._parts,
           });
+          // console.log(el.data);
         });
         setUserPasswords(allPasswords);
         setIsLoading(false);
       });
-      console.log(currentUserId)
     return () => subscriber();
   }, [currentUserId]);
-
 
   const renderPasswords = ({item}: any) => {
     return (
@@ -82,8 +88,13 @@ const UserPage = ({}) => {
                     name: item.data.name,
                     type: item.data.type,
                     id: item.id,
-                    currentUserId: currentUserId
+                    currentUserId: currentUserId,
                   }}
+                />
+                <Ionicons
+                  name="clipboard-outline"
+                  size={30}
+                  onPress={() => copyToClip(item)}
                 />
               </View>
             </View>
@@ -102,9 +113,7 @@ const UserPage = ({}) => {
 
   return (
     <View style={styles.container}>
-      {/* {isLoading && (
-        <FlatList data={userPasswords} renderItem={renderPasswords} />
-      )} */}
+      {currentUserId && <Header id={currentUserId} />}
       {isLoading ? (
         <ActivityIndicator size="large" />
       ) : (
@@ -114,14 +123,15 @@ const UserPage = ({}) => {
       <View style={{alignItems: 'center'}}>
         <TouchableOpacity
           style={styles.button}
-          onPress={() => navigation.navigate('CreatePassword', {
-            currentUserId: currentUserId
-          })}>
+          onPress={() =>
+            navigation.navigate('CreatePassword', {
+              currentUserId: currentUserId,
+            })
+          }>
           <Text style={{color: 'white'}}>Add a new password</Text>
         </TouchableOpacity>
       </View>
-
-      {/* <Button title="Press" onPress={test} /> */}
+      {/* <Button title="Press" onPress={() => navigation.navigate('Home')} /> */}
     </View>
   );
 };

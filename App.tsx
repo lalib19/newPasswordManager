@@ -1,10 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from 'react';
 import {StyleSheet, View} from 'react-native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {NavigationContainer} from '@react-navigation/native';
-// import auth from '@react-native-firebase/auth';
-// import database from '@react-native-firebase/database';
 import Home from './Screens/Home';
 import SignIn from './Screens/SignIn';
 import SignUp from './Screens/SignUp';
@@ -23,7 +20,10 @@ export type RouteParams = {
 const App = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator>
+      <Stack.Navigator
+        screenOptions={() => ({
+          headerShown: false,
+        })}>
         <Stack.Screen name="Home" component={Home} />
         <Stack.Screen name="SignIn" component={SignIn} />
         <Stack.Screen name="SignUp" component={SignUp} />
