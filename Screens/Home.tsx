@@ -5,28 +5,62 @@ import {RouteParams} from '../App';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import auth, {firebase} from '@react-native-firebase/auth';
 import Header from '../Components/Header';
+import MMKVStorage, {
+  MMKVLoader,
+  useMMKVStorage,
+  create,
+} from 'react-native-mmkv-storage';
+
+const storage = new MMKVLoader().withEncryption().initialize();
 
 const Home = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RouteParams>>();
-  // const [noUserError, setNoUserError] = useState<string>('');
-  // const [initializing, setInitializing] = useState(true);
-  const [loggedIn, setLoggedIn] = useState<boolean>(false);
-
   const currentUserId: string | undefined = firebase.auth().currentUser?.uid;
 
+  const [loggedIn, setLoggedIn] = useState<boolean>(false);
+  const mmkvEmail: string | undefined | null = storage.getString('email');
+  const mmkvPassword: string | undefined | null = storage.getString('password');
+
+  if (mmkvEmail && mmkvPassword && !currentUserId) {
+    auth()
+      .signInWithEmailAndPassword(mmkvEmail, mmkvPassword)
+      .then(() => {
+        console.log('You are connected!');
+        console.log(`logged in ? ${loggedIn}`)
+        navigation.replace('UserPage');
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  }
+
+  // useEffect(() => {
+  //   const unsubscribe = auth().onAuthStateChanged(() =>
+  //     currentUserId ? setLoggedIn(true) : setLoggedIn(false),
+  //   );
+  //   console.log(storage.getString('email'));
+  //   console.log(storage.getString('password'));
+  //   return unsubscribe;
+  // });
+
   useEffect(() => {
-    // console.log(loggedIn);
-    const unsubscribe = auth().onAuthStateChanged(() =>
-      currentUserId ? setLoggedIn(true) : setLoggedIn(false),
+    const unsubscribe = navigation.addListener('focus', () =>
+      auth().onAuthStateChanged(() =>
+        currentUserId ? setLoggedIn(true) : setLoggedIn(false),
+      ),
     );
+    console.log(`connected? : ${loggedIn}`);
+    console.log(storage.getString('email'));
+    console.log(storage.getString('password'));
+    // console.log(firebase.auth().currentUser?.email)
     return unsubscribe;
-  }, [loggedIn]);
+  }, [navigation]);
 
   return (
     <View style={styles.container}>
-      {loggedIn && <Header id={currentUserId} />}
+      {/* {currentUserId && <Header id={currentUserId} />} */}
       <View style={styles.subcontainer}>
-        {!loggedIn && (
+        {!currentUserId && (
           <View style={styles.buttons}>
             <TouchableOpacity
               style={styles.button}
@@ -44,7 +78,7 @@ const Home = () => {
             </TouchableOpacity>
           </View>
         )}
-        {loggedIn && (
+        {currentUserId && (
           <TouchableOpacity
             style={[styles.button, {backgroundColor: 'teal'}]}
             onPress={() => {

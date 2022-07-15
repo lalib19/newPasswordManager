@@ -7,6 +7,14 @@ import auth from '@react-native-firebase/auth';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RouteParams} from '../App';
+// import { useStorage } from './Home';
+import MMKVStorage, {
+  MMKVLoader,
+  useMMKVStorage,
+  create,
+} from 'react-native-mmkv-storage';
+
+const storage = new MMKVLoader().withEncryption().initialize();
 
 type FormValues = {
   email: string;
@@ -15,8 +23,15 @@ type FormValues = {
 };
 
 const SignIn = () => {
-
   const navigation = useNavigation<NativeStackNavigationProp<RouteParams>>();
+  const [mmkvEmail, setMmkvEmail] = useMMKVStorage<string | undefined>(
+    'email',
+    storage,
+  );
+  const [mmkvPassword, setMmkvPassword] = useMMKVStorage<string | undefined>(
+    'password',
+    storage,
+  );
 
   const onSubmit = (values: FormValues) => {
     auth()
@@ -24,6 +39,8 @@ const SignIn = () => {
       .then(() => {
         console.log('You are connected!');
         console.log(values);
+        setMmkvEmail(values.email);
+        setMmkvPassword(values.password);
         navigation.replace('UserPage');
       })
       .catch(error => {

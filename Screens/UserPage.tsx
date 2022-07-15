@@ -7,6 +7,10 @@ import {
   View,
   ToastAndroid,
   Button,
+  Alert,
+  TouchableHighlight,
+  TouchableNativeFeedback,
+  Pressable,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import auth, {firebase} from '@react-native-firebase/auth';
@@ -75,10 +79,13 @@ const UserPage = ({}) => {
         <View style={styles.items}>
           <View>
             <View style={styles.itemsInfo}>
+              <Text style={{fontWeight: 'bold'}}>
+                {item.data.name}{' '}
+                <Text style={{fontWeight: 'normal'}}>({item.data.type})</Text>
+              </Text>
               <Text>Login : {item.data.login}</Text>
               <Text>Password : {item.data.password}</Text>
-              <Text>Name : {item.data.name}</Text>
-              <Text>Type : {item.data.type}</Text>
+              {/* <Text>Type : {item.data.type}</Text> */}
               {/* <Text>Path : {item.path}</Text> */}
               <View style={styles.icon}>
                 <ModalComponent
@@ -100,11 +107,14 @@ const UserPage = ({}) => {
             </View>
           </View>
           <View style={{alignItems: 'center', marginVertical: 10}}>
-            <TouchableOpacity
+            <Pressable
               style={styles.delete}
-              onPress={() => deletePassword(item)}>
+              onPress={() => deletePassword(item)}
+              android_ripple={{color: "red", borderless: false, foreground: false, }}
+              onLongPress={() => Alert.alert("Are you sure ?")}
+              >
               <Text style={{color: 'white'}}>Delete Password</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
         </View>
       </View>
@@ -113,7 +123,7 @@ const UserPage = ({}) => {
 
   return (
     <View style={styles.container}>
-      {currentUserId && <Header id={currentUserId} />}
+      {currentUserId && <Header email={firebase.auth().currentUser?.email} />}
       {isLoading ? (
         <ActivityIndicator size="large" />
       ) : (
@@ -128,7 +138,8 @@ const UserPage = ({}) => {
               currentUserId: currentUserId,
             })
           }>
-          <Text style={{color: 'white'}}>Add a new password</Text>
+          {/* <Text style={{color: 'white', fontSize: 40}}>+</Text> */}
+          <Ionicons name="add-outline" size={30} color="white" />
         </TouchableOpacity>
       </View>
       {/* <Button title="Press" onPress={() => navigation.navigate('Home')} /> */}
@@ -157,7 +168,7 @@ const styles = StyleSheet.create({
   items: {
     flex: 1,
     width: '100%',
-    height: '100%',
+    height: '0%',
     // margin: 5,
     padding: 10,
     backgroundColor: 'gold',
@@ -180,14 +191,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   button: {
-    height: 50,
-    width: '80%',
-    backgroundColor: 'dodgerblue',
+    height: 80,
+    width: 80,
+    backgroundColor: 'tomato',
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 10,
-    margin: 10,
+    borderRadius: 100,
     elevation: 5,
+    position: 'absolute',
+    bottom: 30,
+    right: 30,
+    // borderWidth: 1
   },
   icon: {
     position: 'absolute',

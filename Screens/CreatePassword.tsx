@@ -67,31 +67,6 @@ const CreatePassword = ({route}: any) => {
         }) => (
           <View style={styles.form}>
             <View style={styles.combo}>
-              <Text style={styles.label}>Login</Text>
-              <TextInput
-                style={styles.input}
-                onChangeText={handleChange('login')}
-                onBlur={handleBlur('login')}
-                value={values.login}
-              />
-              {errors.login && touched.login && (
-                <Text style={styles.error}>{errors.login}</Text>
-              )}
-            </View>
-            <View style={styles.combo}>
-              <Text style={styles.label}>Password</Text>
-              <TextInput
-                style={styles.input}
-                onChangeText={handleChange('password')}
-                onBlur={handleBlur('password')}
-                value={values.password}
-                // secureTextEntry={true}
-              />
-              {errors.password && touched.password && (
-                <Text style={styles.error}>{errors.password}</Text>
-              )}
-            </View>
-            <View style={styles.combo}>
               <Text style={styles.label}>Name</Text>
               <TextInput
                 style={styles.input}
@@ -117,6 +92,32 @@ const CreatePassword = ({route}: any) => {
                 <Text style={styles.error}>{errors.type}</Text>
               )}
             </View>
+            <View style={styles.combo}>
+              <Text style={styles.label}>Login</Text>
+              <TextInput
+                style={styles.input}
+                onChangeText={handleChange('login')}
+                onBlur={handleBlur('login')}
+                value={values.login}
+              />
+              {errors.login && touched.login && (
+                <Text style={styles.error}>{errors.login}</Text>
+              )}
+            </View>
+            <View style={styles.combo}>
+              <Text style={styles.label}>Password</Text>
+              <TextInput
+                style={styles.input}
+                onChangeText={handleChange('password')}
+                onBlur={handleBlur('password')}
+                value={values.password}
+                // secureTextEntry={true}
+              />
+              {errors.password && touched.password && (
+                <Text style={styles.error}>{errors.password}</Text>
+              )}
+            </View>
+
             <Button onPress={handleSubmit} title="Submit" disabled={!isValid} />
           </View>
         )}
