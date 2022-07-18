@@ -10,6 +10,20 @@ import MMKVStorage, {
   useMMKVStorage,
   create,
 } from 'react-native-mmkv-storage';
+import ReactNativeBiometrics, {BiometryTypes} from 'react-native-biometrics';
+
+const rnBiometrics = new ReactNativeBiometrics();
+
+rnBiometrics.isSensorAvailable().then(resultObject => {
+  const {available, biometryType} = resultObject;
+
+  if (available && biometryType === BiometryTypes.Biometrics) {
+    // console.log('Biometrics is supported')
+    console.log(resultObject);
+  } else {
+    console.log('Biometrics not supported');
+  }
+});
 
 const storage = new MMKVLoader().withEncryption().initialize();
 
@@ -26,7 +40,7 @@ const Home = () => {
       .signInWithEmailAndPassword(mmkvEmail, mmkvPassword)
       .then(() => {
         console.log('You are connected!');
-        console.log(`logged in ? ${loggedIn}`)
+        console.log(`logged in ? ${loggedIn}`);
         navigation.replace('UserPage');
       })
       .catch(error => {
@@ -49,9 +63,9 @@ const Home = () => {
         currentUserId ? setLoggedIn(true) : setLoggedIn(false),
       ),
     );
-    console.log(`connected? : ${loggedIn}`);
-    console.log(storage.getString('email'));
-    console.log(storage.getString('password'));
+    // console.log(`connected? : ${loggedIn}`);
+    // console.log(storage.getString('email'));
+    // console.log(storage.getString('password'));
     // console.log(firebase.auth().currentUser?.email)
     return unsubscribe;
   }, [navigation]);

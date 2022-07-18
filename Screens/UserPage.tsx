@@ -11,10 +11,13 @@ import {
   TouchableHighlight,
   TouchableNativeFeedback,
   Pressable,
+  PermissionsAndroid,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import auth, {firebase} from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
+import storage from '@react-native-firebase/storage';
+import {utils} from '@react-native-firebase/app';
 import {useNavigation} from '@react-navigation/native';
 import {RouteParams} from '../App';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
@@ -22,12 +25,39 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import ModalComponent from '../Components/ModalComponent';
 import Header from '../Components/Header';
 import Clipboard from '@react-native-clipboard/clipboard';
+
 // import Ionicons from 'react-native-ionicons';
 
 type PasswordArray = {
   data: any;
   id: string;
 };
+
+const requestCameraPermission = async () => {
+  try {
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+      {
+        title: "Cool Photo App Camera Permission",
+        message:
+          "Cool Photo App needs access to your camera " +
+          "so you can take awesome pictures.",
+        buttonNeutral: "Ask Me Later",
+        buttonNegative: "Cancel",
+        buttonPositive: "OK"
+      }
+    );
+    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+      console.log("You can use the camera");
+    } else {
+      console.log("Camera permission denied");
+    }
+  } catch (err) {
+    console.warn(err);
+  }
+};
+
+
 const UserPage = ({}) => {
   const [userPasswords, setUserPasswords] = useState<PasswordArray[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -44,12 +74,26 @@ const UserPage = ({}) => {
       .delete()
       .then(() => {
         console.log('User deleted!');
-      });
+      })
+      .catch(err => console.log(err));
   };
 
   const copyToClip = (item: any) => {
     Clipboard.setString(item.data.password);
     ToastAndroid.show('Password copied to clipboard !', ToastAndroid.SHORT);
+  };
+
+  // const reference = storage().ref('imageTest/IMG_20220716_135902.jpg');
+  const reference = storage().ref('imageTest/414888b.jpg');
+  const uploadFile = () => {
+    
+
+    // const pathToFile = `${utils.FilePath.PICTURES_DIRECTORY}/IMG_20220716_135902.jpg`;
+    const pathToFile = `${utils.FilePath.PICTURES_DIRECTORY}/Reddit/414888b.jpg`;
+    reference
+      .putFile(pathToFile)
+      .then(answer => console.log(answer, 'yas'))
+      .catch(err => console.log(err));
   };
 
   useEffect(() => {
@@ -70,6 +114,9 @@ const UserPage = ({}) => {
         setUserPasswords(allPasswords);
         setIsLoading(false);
       });
+
+    console.log(utils.FilePath.PICTURES_DIRECTORY);
+
     return () => subscriber();
   }, [currentUserId]);
 
@@ -110,9 +157,12 @@ const UserPage = ({}) => {
             <Pressable
               style={styles.delete}
               onPress={() => deletePassword(item)}
-              android_ripple={{color: "red", borderless: false, foreground: false, }}
-              onLongPress={() => Alert.alert("Are you sure ?")}
-              >
+              android_ripple={{
+                color: 'red',
+                borderless: false,
+                foreground: false,
+              }}
+              onLongPress={() => Alert.alert('Are you sure ?')}>
               <Text style={{color: 'white'}}>Delete Password</Text>
             </Pressable>
           </View>
@@ -142,7 +192,8 @@ const UserPage = ({}) => {
           <Ionicons name="add-outline" size={30} color="white" />
         </TouchableOpacity>
       </View>
-      {/* <Button title="Press" onPress={() => navigation.navigate('Home')} /> */}
+      <Button title="request permissions" onPress={requestCameraPermission} />
+      <Button title="Upload" onPress={uploadFile} />
     </View>
   );
 };

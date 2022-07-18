@@ -13,14 +13,19 @@ import MMKVStorage, {
   useMMKVStorage,
   create,
 } from 'react-native-mmkv-storage';
-
-const storage = new MMKVLoader().withEncryption().initialize();
+import ReactNativeBiometrics from 'react-native-biometrics';
 
 type FormValues = {
   email: string;
   password: string;
   // name?: string,
 };
+
+const storage = new MMKVLoader().withEncryption().initialize();
+let epochTimeSeconds = Math.round(new Date().getTime() / 1000).toString();
+let payload = epochTimeSeconds + 'some message';
+
+const rnBiometrics = new ReactNativeBiometrics();
 
 const SignIn = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RouteParams>>();
@@ -53,6 +58,51 @@ const SignIn = () => {
         // }
         console.error(error);
       });
+  };
+
+  const biometryLogin = () => {
+    rnBiometrics
+      .biometricKeysExist()
+      .then(resultObject => {
+        const {keysExist} = resultObject;
+
+        if (keysExist) {
+          rnBiometrics
+            .createSignature({
+              promptMessage: 'Sign in',
+              payload: payload,
+            })
+            .then(resultObject => {
+              const {success, signature} = resultObject;
+
+              if (success) {
+                console.log(signature);
+                // verifySignatureWithServer(signature, payload);
+                auth()
+                  .signInWithEmailAndPassword("test1@test.com", "123456")
+                  .then(() => {
+                    setMmkvEmail("test1@test.com");
+                    setMmkvPassword("123456");
+                    navigation.replace('UserPage');
+                  })
+                  .catch(error => {
+                    console.error(error);
+                  });
+              }
+            })
+            .catch(err => console.log(err));
+        } else {
+          rnBiometrics
+            .createKeys()
+            .then(resultObject => {
+              const {publicKey} = resultObject;
+              console.log(publicKey);
+              // sendPublicKeyToServer(publicKey);
+            })
+            .catch(err => console.log(err));
+        }
+      })
+      .catch(err => console.log(err));
   };
 
   const loginValidationSchema = yup.object({
@@ -107,6 +157,10 @@ const SignIn = () => {
               )}
             </View>
             <Button onPress={handleSubmit} title="Submit" disabled={!isValid} />
+            <Button
+              onPress={biometryLogin}
+              title="Login with biometry"
+            />
           </View>
         )}
       </Formik>
