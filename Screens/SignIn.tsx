@@ -76,7 +76,7 @@ const SignIn = () => {
               const {success, signature} = resultObject;
 
               if (success) {
-                console.log(signature);
+                // console.log(signature);
                 // verifySignatureWithServer(signature, payload);
                 auth()
                   .signInWithEmailAndPassword("test1@test.com", "123456")
