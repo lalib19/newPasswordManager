@@ -8,8 +8,6 @@ import {
   ToastAndroid,
   Button,
   Alert,
-  TouchableHighlight,
-  TouchableNativeFeedback,
   Pressable,
   PermissionsAndroid,
   Image,
@@ -17,8 +15,6 @@ import {
 import React, {useEffect, useState} from 'react';
 import auth, {firebase} from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
-import storage from '@react-native-firebase/storage';
-import {utils} from '@react-native-firebase/app';
 import {useNavigation} from '@react-navigation/native';
 import {RouteParams} from '../App';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
@@ -26,7 +22,6 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import ModalComponent from '../Components/ModalComponent';
 import Header from '../Components/Header';
 import Clipboard from '@react-native-clipboard/clipboard';
-import CameraRoll from '@react-native-community/cameraroll';
 
 // import Ionicons from 'react-native-ionicons';
 
@@ -35,51 +30,12 @@ type PasswordArray = {
   id: string;
 };
 
-const requestCameraPermission = async () => {
-  try {
-    const granted = await PermissionsAndroid.request(
-      PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
-      {
-        title: 'Cool Photo App Camera Permission',
-        message:
-          'Cool Photo App needs access to your camera ' +
-          'so you can take awesome pictures.',
-        buttonNeutral: 'Ask Me Later',
-        buttonNegative: 'Cancel',
-        buttonPositive: 'OK',
-      },
-    );
-    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-      console.log('You can use the camera');
-    } else {
-      console.log('Camera permission denied');
-    }
-  } catch (err) {
-    console.warn(err);
-  }
-};
-
-const UserPage = ({}) => {
+const UserPasswords = ({}) => {
   const [userPasswords, setUserPasswords] = useState<PasswordArray[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [photos, setPhotos] = useState<any>();
 
   const navigation = useNavigation<NativeStackNavigationProp<RouteParams>>();
   const currentUserId: string | undefined = firebase.auth().currentUser?.uid;
-
-  const fetchPhotos = () => {
-    CameraRoll.getPhotos({
-      first: 5,
-      assetType: 'Photos',
-    })
-      .then(response => {
-        setPhotos(response.edges);
-        console.log(response.edges[0].node.image.uri);
-      })
-      .catch(err => {
-        console.log(err);
-      });
-  };
 
   const deletePassword = (item: {id: string | undefined}) => {
     firestore()
@@ -97,17 +53,6 @@ const UserPage = ({}) => {
   const copyToClip = (item: any) => {
     Clipboard.setString(item.data.password);
     ToastAndroid.show('Password copied to clipboard !', ToastAndroid.SHORT);
-  };
-
-  // const reference = storage().ref('imageTest/IMG_20220716_135902.jpg');
-  const reference = storage().ref('imageTest/414888b.jpg');
-  const uploadFile = () => {
-    // const pathToFile = `${utils.FilePath.PICTURES_DIRECTORY}/IMG_20220716_135902.jpg`;
-    const pathToFile = `${utils.FilePath.PICTURES_DIRECTORY}/Reddit/414888b.jpg`;
-    reference
-      .putFile(pathToFile)
-      .then(answer => console.log(answer, 'yas'))
-      .catch(err => console.log(err));
   };
 
   useEffect(() => {
@@ -128,9 +73,6 @@ const UserPage = ({}) => {
         setUserPasswords(allPasswords);
         setIsLoading(false);
       });
-
-    // console.log(utils.FilePath.PICTURES_DIRECTORY);
-    // console.log(utils.FilePath.PICTURES_DIRECTORY/Gallery/owner/firestore);
 
     return () => subscriber();
   }, [currentUserId]);
@@ -194,7 +136,6 @@ const UserPage = ({}) => {
       ) : (
         <FlatList data={userPasswords} renderItem={renderPasswords} />
       )}
-      {/* <Text>yoo</Text> */}
       <View style={{alignItems: 'center'}}>
         <TouchableOpacity
           style={styles.button}
@@ -207,24 +148,11 @@ const UserPage = ({}) => {
           <Ionicons name="add-outline" size={30} color="white" />
         </TouchableOpacity>
       </View>
-      <Image
-        style={{
-          width: 51,
-          height: 51,
-          resizeMode: 'contain',
-        }}
-        source={{
-          uri: 'file:///storage/emulated/0/Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Images/IMG-20220719-WA0001.jpg',
-        }}
-      />
-      <Button title="request permissions" onPress={requestCameraPermission} />
-      <Button title="Upload" onPress={uploadFile} />
-      <Button title="Fetch Photos" onPress={fetchPhotos} />
     </View>
   );
 };
 
-export default UserPage;
+export default UserPasswords;
 
 const styles = StyleSheet.create({
   container: {

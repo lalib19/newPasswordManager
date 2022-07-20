@@ -41,7 +41,7 @@ const Home = () => {
       .then(() => {
         console.log('You are connected!');
         console.log(`logged in ? ${loggedIn}`);
-        navigation.replace('UserPage');
+        navigation.replace('UserPasswords');
       })
       .catch(error => {
         console.error(error);
@@ -93,14 +93,23 @@ const Home = () => {
           </View>
         )}
         {currentUserId && (
-          <TouchableOpacity
-            style={[styles.button, {backgroundColor: 'teal'}]}
-            onPress={() => {
-              navigation.navigate('UserPage');
-            }}>
-            <Text style={{fontSize: 20, color: 'white'}}>UserPage</Text>
-          </TouchableOpacity>
-        )}
+            <TouchableOpacity
+              style={[styles.button, {backgroundColor: 'teal', width: 200}]}
+              onPress={() => {
+                navigation.navigate('UserPasswords');
+              }}>
+              <Text style={{fontSize: 20, color: 'white'}}>UserPasswords</Text>
+            </TouchableOpacity>
+          )}
+        {currentUserId && (
+            <TouchableOpacity
+              style={[styles.button, {backgroundColor: 'teal', width: 200}]}
+              onPress={() => {
+                navigation.navigate('UserImages');
+              }}>
+              <Text style={{fontSize: 20, color: 'white'}}>UserImages</Text>
+            </TouchableOpacity>
+          )}
         {/* <View style={styles.error}>
         <Text onPress={() => setNoUserError('')} style={{borderBottomWidth: 1, borderBottomColor: "grey"}}>
           {noUserError}

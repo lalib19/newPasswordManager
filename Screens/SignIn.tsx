@@ -46,7 +46,7 @@ const SignIn = () => {
         console.log(values);
         setMmkvEmail(values.email);
         setMmkvPassword(values.password);
-        navigation.replace('UserPage');
+        navigation.replace('UserPasswords');
       })
       .catch(error => {
         // if (error.code === 'auth/email-already-in-use') {
@@ -83,7 +83,7 @@ const SignIn = () => {
                   .then(() => {
                     setMmkvEmail("test1@test.com");
                     setMmkvPassword("123456");
-                    navigation.replace('UserPage');
+                    navigation.replace('UserPasswords');
                   })
                   .catch(error => {
                     console.error(error);

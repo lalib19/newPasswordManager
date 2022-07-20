@@ -5,8 +5,9 @@ import {NavigationContainer} from '@react-navigation/native';
 import Home from './Screens/Home';
 import SignIn from './Screens/SignIn';
 import SignUp from './Screens/SignUp';
-import UserPage from './Screens/UserPage';
+import UserPasswords from './Screens/UserPasswords';
 import CreatePassword from './Screens/CreatePassword';
+import UserImages from './Screens/UserImages';
 
 const Stack = createNativeStackNavigator<RouteParams>();
 
@@ -14,7 +15,8 @@ export type RouteParams = {
   Home: undefined;
   SignUp: undefined;
   SignIn: undefined;
-  UserPage: undefined | {user: string};
+  UserPasswords: undefined | {user: string};
+  UserImages: undefined ;
   CreatePassword: undefined | {currentUserId: string | undefined};
 };
 const App = () => {
@@ -27,7 +29,8 @@ const App = () => {
         <Stack.Screen name="Home" component={Home} />
         <Stack.Screen name="SignIn" component={SignIn} />
         <Stack.Screen name="SignUp" component={SignUp} />
-        <Stack.Screen name="UserPage" component={UserPage} />
+        <Stack.Screen name="UserPasswords" component={UserPasswords} />
+        <Stack.Screen name="UserImages" component={UserImages} />
         <Stack.Screen name="CreatePassword" component={CreatePassword} />
       </Stack.Navigator>
     </NavigationContainer>

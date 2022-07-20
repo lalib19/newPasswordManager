@@ -38,7 +38,7 @@ const CreatePassword = ({route}: any) => {
       })
       .then(() => {
         console.log('User added!');
-        navigation.navigate('UserPage');
+        navigation.navigate('UserPasswords');
       })
       .catch(error => {
         console.log(error);

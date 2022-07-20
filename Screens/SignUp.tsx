@@ -24,7 +24,7 @@ const SignUp = () => {
       .then(() => {
         console.log('User account created & signed in!');
         console.log(values);
-        navigation.replace('UserPage');
+        navigation.replace('UserPasswords');
       })
       .catch(error => {
         if (error.code === 'auth/email-already-in-use') {
