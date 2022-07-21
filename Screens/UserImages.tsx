@@ -14,6 +14,7 @@ import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
 import {utils} from '@react-native-firebase/app';
 import CameraRoll from '@react-native-community/cameraroll';
+import ModalPhotoGallery from '../Components/ModalPhotoGallery';
 
 const requestCameraPermission = async () => {
   try {
@@ -40,47 +41,76 @@ const requestCameraPermission = async () => {
 };
 
 const UserImages = () => {
-  const [photos, setPhotos] = useState<any>();
-  const [isSelected, setIsSelected] = useState<boolean>(false);
-  const [selectedItems, setSelectedItems] = useState<[]>([])
+  const [phonePhotos, setPhonePhotos] = useState<object[]>();
+  const [storagePhotos, setStoragePhotos] = useState<string[]>([]);
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
 
-  const userPhotos = () => {
+  const getUserPhotos = () => {
     CameraRoll.getPhotos({
-      first: 60,
+      first: 15,
       assetType: 'Photos',
       groupName: 'Camera',
       include: ['filename'],
     })
       .then(response => {
-        setPhotos(response.edges);
-        // console.log(response.edges[0].node.image.filename);
-        // console.log(response.edges);
+        setPhonePhotos(response.edges);
+        console.log(response.edges[0].node.image.uri);
       })
       .catch(err => {
         console.log(err);
       });
   };
 
-//   const toggleSelect = (index: string | number) => {
-//     setIsSelected(prevState => {
-//       prevState.items[index].selected = !prevState.items[index].selected;
-//       return {...prevState};
-//     });
-//   };
+  const getStoragePhotos = (ref: string) => {
+    const fetchedPhotos: string[] = [];
+    storage()
+      .ref(ref)
+      .list()
+      .then(result => {
+        result.items.forEach(ref => {
+          storage()
+            .ref(ref.fullPath)
+            .getDownloadURL()
+            .then(res => {
+              fetchedPhotos.push(res);
+              setStoragePhotos(fetchedPhotos);
+              // console.log(storagePhotos);
+              // console.log(fetchedPhotos)
+            })
+            .catch(err => console.log(err));
+        });
+        // if (result.nextPageToken) {
+        //   return getStoragePhotos(ref, result.nextPageToken);
+        // }
+      })
+      .catch(err => console.log(err));
+  };
 
-const handleSelect = (item: any) => {
-    setIsSelected(!isSelected)
-}
+  const handleSelect = (item: any) => {
+    let ids: string[] = [...selectedItems];
 
-  const renderPhotos = ({item, keyExtractor}: any) => {
-    const imageName = item.node.image.filename;
-    const bucketReference = `${utils.FilePath.PICTURES_DIRECTORY}/${imageName}`;
+    if (ids.includes(item.node.image.filename)) {
+      ids = ids.filter(name => name !== item.node.image.filename);
+    } else ids.push(item.node.image.filename);
+    setSelectedItems(ids);
+  };
+
+  const renderStoragePhotos = ({item}: any) => {
+    return (
+      <View style={styles.container}>
+        <View style={styles.imageContainer}>
+          <Image style={{width: '97%', height: 200}} source={{uri: item}} />
+        </View>
+      </View>
+    );
+  };
+  const renderUserPhotos = ({item}: any) => {
     return (
       <View style={styles.container}>
         <View style={styles.imageContainer}>
           <TouchableOpacity
             style={{flex: 1}}
-            onPress={(item) => handleSelect}>
+            onPress={() => handleSelect(item)}>
             <Image
               style={[
                 {
@@ -91,7 +121,8 @@ const handleSelect = (item: any) => {
                   borderColor: 'grey',
                   //   resizeMode: 'contain',
                 },
-                isSelected && styles.selectedStyle,
+                selectedItems.includes(item.node.image.filename) &&
+                  styles.selectedStyle,
               ]}
               source={{
                 uri: item.node.image.uri,
@@ -103,10 +134,18 @@ const handleSelect = (item: any) => {
     );
   };
 
-  const reference = storage().ref('imageTest/414888b.jpg');
+  const reference = storage().ref('imageTest/toto.jpg');
   const uploadFile = () => {
+    // const imageName = item.node.image.filename;
+    // const bucketReference = `${utils.FilePath.PICTURES_DIRECTORY}/${imageName}`;
+
     // const pathToFile = `${utils.FilePath.PICTURES_DIRECTORY}/IMG_20220716_135902.jpg`;
-    const pathToFile = `${utils.FilePath.PICTURES_DIRECTORY}/Reddit/414888b.jpg`;
+    // const pathToFile = `${utils.FilePath.PICTURES_DIRECTORY}/Reddit/414888b.jpg`;
+    const pathToFile =
+      'file:///storage/emulated/0/DCIM/Camera/IMG_20220716_135902.jpg'.split(
+        'file://',
+      )[1];
+    console.log(pathToFile);
     reference
       .putFile(pathToFile)
       .then(answer => console.log(answer, 'yas'))
@@ -114,17 +153,31 @@ const handleSelect = (item: any) => {
   };
 
   return (
-    <View>
+    <View style={styles.container}>
       <FlatList
-        data={photos}
-        renderItem={renderPhotos}
+        data={storagePhotos}
+        renderItem={renderStoragePhotos}
         numColumns={3}
-        keyExtractor={item => item.node.image.filename}
+      />
+      <FlatList
+        data={phonePhotos}
+        renderItem={renderUserPhotos}
+        numColumns={3}
+        extraData={selectedItems}
+        // keyExtractor={item => item.node.image.filename}
       />
       <View>
         {/* <Button title="request permissions" onPress={requestCameraPermission} /> */}
-        <Button title="Upload" onPress={uploadFile} />
-        <Button title="Choose a photo" onPress={userPhotos} />
+        {/* <Button title="Upload" onPress={uploadFile} /> */}
+        {/* <Button
+          title="Get storage Photos"
+          onPress={() => getStoragePhotos('imageTest')}
+        /> */}
+        <Button title="Upload a photo from gallery" onPress={getUserPhotos} />
+        <View
+          style={{height: 40, width: '100%', position: 'absolute', bottom: 0}}>
+          <ModalPhotoGallery />
+        </View>
       </View>
     </View>
   );
@@ -140,8 +193,8 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    flexWrap: 'wrap',
     flexDirection: 'row',
+    // flexWrap: 'wrap',
     // backgroundColor: "tomato",
   },
   selectedStyle: {
